@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Freestar: The Ad Server Quest</title>
+    <script src="https://unpkg.com/kaplay@3001.0.0-alpha.20/dist/kaplay.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+        #inventory-hud {
+            position: absolute; top: 10px; right: 10px;
+            width: 200px; background: rgba(0, 0, 0, 0.8);
+            color: #00ff00; padding: 10px; border: 2px solid #00ff00;
+            display: none; /* Hidden until game starts */
+        }
+        .tool-item { font-size: 12px; margin-bottom: 5px; border-bottom: 1px solid #333; }
+        #download-btn { 
+            margin-top: 10px; padding: 5px; background: #00ff00; 
+            color: black; cursor: pointer; text-align: center; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="inventory-hud">
+    <h3>TOOLKIT</h3>
+    <div id="tool-list"><em>No tools found yet...</em></div>
+    <div id="download-btn" onclick="downloadToolkit()">DOWNLOAD SCRIPTS</div>
+</div>
+
+<script>
+// 1. Initialize KAPLAY
+const k = kaplay({
+    global: true,
+    touchToMouse: true,
+    background: [10, 10, 20], // Dark "Ad Tech" blue
+});
+
+// 2. Inventory State
+let inventory = [];
+
+function addToInventory(toolName, scriptContent) {
+    inventory.push({ name: toolName, code: scriptContent });
+    updateHUD();
+}
+
+function updateHUD() {
+    const list = document.getElementById("tool-list");
+    list.innerHTML = inventory.map(item => `<div class="tool-item">🛡️ ${item.name}</div>`).join("");
+}
+
+function downloadToolkit() {
+    const text = inventory.map(i => `// ${i.name}\n${i.code}\n`).join("\n\n");
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "freestar_ops_toolkit.txt";
+    a.click();
+}
+
+// 3. The Title Scene
+k.scene("intro", () => {
+    k.add([
+        k.text("FREESTAR:\nAD SERVER QUEST", { size: 48 }),
+        k.pos(k.center()),
+        k.anchor("center"),
+        k.color(255, 255, 255),
+    ]);
+
+    k.add([
+        k.text("Click to Enter the Ecosystem", { size: 24 }),
+        k.pos(k.center().x, k.center().y + 100),
+        k.anchor("center"),
+    ]);
+
+    k.onClick(() => {
+        document.getElementById("inventory-hud").style.display = "block";
+        k.go("game");
+    });
+});
+
+// 4. The Main Game Scene
+k.scene("game", () => {
+    k.add([
+        k.text("Use Arrows to Move", { size: 18 }),
+        k.pos(20, 20),
+    ]);
+
+    // Create the "Hero" (The Prebid Winner)
+    const player = k.add([
+        k.rect(40, 40),
+        k.pos(k.center()),
+        k.color(255, 200, 0), // Gold
+        k.area(),
+        k.body(),
+    ]);
+
+    // Movement
+    const SPEED = 320;
+    k.onKeyDown("left", () => player.move(-SPEED, 0));
+    k.onKeyDown("right", () => player.move(SPEED, 0));
+    k.onKeyDown("up", () => player.move(0, -SPEED));
+    k.onKeyDown("down", () => player.move(0, SPEED));
+
+    // A "Tool Chest" (Example: GPT Console Tool)
+    const chest = k.add([
+        k.rect(30, 30),
+        k.pos(200, 200),
+        k.color(0, 255, 0),
+        k.area(),
+        "tool-chest",
+    ]);
+
+    player.onCollide("tool-chest", (c) => {
+        k.destroy(c);
+        addToInventory("GPT Console Opener", "window.location.search += '?google_console=1';");
+        k.debug.log("Tool Unlocked: GPT Console!");
+    });
+});
+
+// Start the app
+k.go("intro");
+</script>
+</body>
+</html>
