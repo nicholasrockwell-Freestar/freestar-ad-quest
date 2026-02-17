@@ -15,3 +15,7 @@ Thumbs.db
 # Environment/Build
 dist/
 .env
+
+# Files to ignore during development
+README.txt
+README.md
