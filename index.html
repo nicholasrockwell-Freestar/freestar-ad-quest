@@ -13,14 +13,14 @@
             background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 10;
         }
         #inventory-hud {
-            position: absolute; top: 20px; right: 20px; width: 220px; 
+            position: absolute; top: 20px; right: 20px; width: 220px; height: 90vh; 
             background: #2E0F3A; color: #FFDF00; padding: 15px; 
             border: 4px solid #DC9200; display: none; z-index: 5;
             box-shadow: 6px 6px 0px #000;
         }
         .tool-item { font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #743282; padding-bottom: 4px; }
         #download-btn { 
-            margin-top: 15px; padding: 10px; background: #FFDF00; 
+            margin-top: 75vh; padding: 10px; background: #FFDF00; 
             color: #2E0F3A; cursor: pointer; text-align: center; 
             font-weight: bold; border: none; box-shadow: 3px 3px 0px #000;
         }
@@ -29,11 +29,15 @@
 </head>
 <body>
     <div id="crt-overlay"></div>
+    
     <div id="inventory-hud">
-        <h3 style="margin-top: 0; border-bottom: 2px solid #FFDF00; font-size: 14px;">INVENTORY</h3>
-        <div id="tool-list"><em>No tools found yet...</em></div>
-        <div id="download-btn">EXPORT SCRIPTS</div>
+        <h3 style="margin-top: 0; border-bottom: 2px solid #FFDF00; font-size: 14px; text-align: center;">GAM BADGES</h3>
+        
+        <div id="tool-list" style="color: white; font-style: italic; font-weight: lighter;"><em>no badges?...</em></div>
+        
+        <!-- <div id="download-btn">EXPORT MASTERY LOG</div> -->
     </div>
+
     <script type="module" src="./js/main.js"></script>
 </body>
 </html>
