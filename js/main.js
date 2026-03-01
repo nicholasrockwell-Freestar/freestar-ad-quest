@@ -8,14 +8,14 @@ const k = kaplay({
 // --- ASSETS ---
 k.loadSprite("rogue", "assets/rogue.png");
 k.loadSprite("prebidWinner", "assets/prebid_winner.png");
-k.loadSprite("cat", "assets/cat.png"); // Load the new cat sprite
+k.loadSprite("cat", "assets/cat.png"); 
 k.loadSprite("scroll", "assets/scroll.png", {
     slice9: { left: 12, right: 12, top: 12, bottom: 12 }
 });
 k.loadSprite("main_tiles", "assets/tilemap.png", { sliceX: 12, sliceY: 11 });
 
 k.loadSprite("crystals", "assets/crystals.png", {
-    sliceX: 10 // 10 different crystal types in one sprite
+    sliceX: 10, 
 });
 
 // --- GLOBAL STATE ---
@@ -35,47 +35,86 @@ const state = {
     allBadgesCollected: () => gameState.badges.size >= 6, 
 };
 
-// --- VISION SYSTEM (PROXIMITY BASED) ---
-function showVision(title, description, link) {
+// --- VISION SYSTEM (CLICKABLE HYPERLINK & TEXT ONLY) ---
+function showVision(data) {
     k.destroyAll("vision-overlay"); 
 
     const ui = k.add([k.fixed(), k.z(300), "vision-overlay"]);
 
     const boxWidth = 600;
-    const boxHeight = 350;
+    const boxHeight = 400; 
 
+    // The Background Scroll
     ui.add([
         k.sprite("scroll", { width: boxWidth, height: boxHeight }),
         k.pos(k.center()),
         k.anchor("center"),
+        k.z(301) 
     ]);
 
+    // The Title
     ui.add([
-        k.text(title.toUpperCase(), { size: 18, font: "'Press Start 2P'", width: boxWidth - 80, align: "center" }),
-        k.pos(k.center().x, k.center().y - 100),
+        k.text(data.name.toUpperCase(), { size: 18, font: "'Press Start 2P'", width: boxWidth - 80, align: "center" }),
+        k.pos(k.center().x, k.center().y - 140),
         k.anchor("center"),
-        k.color(0, 183, 137)
+        k.color(0, 183, 137),
+        k.z(302) 
     ]);
 
+    // The Description (Expanded for all crystals)
     ui.add([
-        k.text(description, { size: 12, font: "'Press Start 2P'", width: boxWidth - 100, lineSpacing: 10, align: "center" }),
-        k.pos(k.center().x, k.center().y - 10),
+        k.text(data.desc, { size: 12, font: "'Press Start 2P'", width: boxWidth - 100, lineSpacing: 10, align: "center" }),
+        k.pos(k.center().x, k.center().y - 30),
         k.anchor("center"),
-        k.color(46, 15, 58)
+        k.color(46, 15, 58),
+        k.z(302) 
     ]);
 
-    ui.add([
-        k.text("RESOURCES: " + link, { size: 10, font: "'Press Start 2P'", width: boxWidth - 100, align: "center" }),
-        k.pos(k.center().x, k.center().y + 80),
-        k.anchor("center"),
-        k.color(0, 0, 255)
-    ]);
+    // --- CLICKABLE LINK SYSTEM ---
+    if (data.link && data.link !== "N/A") {
+        const linkBtn = ui.add([
+            k.text("CLICK HERE FOR RESOURCE ->", { size: 12, font: "'Press Start 2P'" }),
+            k.pos(k.center().x, k.center().y + 80),
+            k.anchor("center"),
+            k.color(0, 0, 255),
+            k.area(), // Gives the text a hitbox for clicking and hovering
+            k.z(302),
+            "resource-link"
+        ]);
 
+        // Hover Effects
+        linkBtn.onHoverUpdate(() => {
+            k.setCursor("pointer");
+            linkBtn.color = k.rgb(0, 150, 255); // Lightens blue on hover
+        });
+        linkBtn.onHoverEnd(() => {
+            k.setCursor("default");
+            linkBtn.color = k.rgb(0, 0, 255); // Returns to dark blue
+        });
+
+        // Click Action
+        linkBtn.onClick(() => {
+            // Ensure the URL has https:// so the browser opens it externally
+            let url = data.link.startsWith("http") ? data.link : "https://" + data.link;
+            window.open(url, "_blank");
+        });
+    } else {
+        ui.add([
+            k.text("NO RESOURCE LINK AVAILABLE", { size: 10, font: "'Press Start 2P'" }),
+            k.pos(k.center().x, k.center().y + 80),
+            k.anchor("center"),
+            k.color(150, 150, 150),
+            k.z(302) 
+        ]);
+    }
+
+    // The Helper Text
     ui.add([
         k.text("WALK AWAY TO CLOSE", { size: 10, font: "'Press Start 2P'" }),
-        k.pos(k.center().x, k.center().y + 120),
+        k.pos(k.center().x, k.center().y + 150),
         k.anchor("center"),
-        k.color(100, 100, 100)
+        k.color(100, 100, 100),
+        k.z(302) 
     ]);
 }
 
@@ -224,7 +263,6 @@ function spawnPlayer(posX, posY) {
         "player"
     ]);
 
-    // Check if player has already collected all cats upon spawning into the room
     const isGamGam = state.allBadgesCollected();
     const nameStr = isGamGam ? "Gam-Gam" : "Sophia Petrillo";
     const textSize = 12;
@@ -245,7 +283,7 @@ function spawnPlayer(posX, posY) {
         k.text(nameStr, { size: textSize, font: "'Press Start 2P'" }),
         k.pos(player.pos.x, player.pos.y + labelYOffset),
         k.anchor("center"),
-        k.color(isGamGam ? k.rgb(255, 223, 0) : k.rgb(255, 255, 255)), // Gold if GamGam, white if Sophia
+        k.color(isGamGam ? k.rgb(255, 223, 0) : k.rgb(255, 255, 255)), 
         k.z(62)
     ]);
 
@@ -398,7 +436,6 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
             const padding = 10;
             const txt = k.make([k.text(s.name, { size: textSize, font: "'Press Start 2P'" })]);
 
-            // Shifted X position by 50px to the right for the Background Box
             k.add([
                 k.rect(txt.width + padding, txt.height + padding),
                 k.pos(pos.x + 30, labelY),
@@ -407,7 +444,6 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
                 k.z(49) 
             ]);
 
-            // Shifted X position by 50px to the right for the Foreground Text
             k.add([
                 k.text(s.name, { size: textSize, font: "'Press Start 2P'", align: "center" }),
                 k.pos(pos.x + 30, labelY),
@@ -416,8 +452,11 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
                 k.z(50) 
             ]);
 
-            shard.onCollide("player", () => showVision(s.name, s.desc, s.link));
-            shard.onCollideEnd("player", () => k.destroyAll("vision-overlay"));
+            shard.onCollide("player", () => showVision(s));
+            shard.onCollideEnd("player", () => {
+                k.setCursor("default"); // Failsafe to ensure cursor returns to normal when walking away
+                k.destroyAll("vision-overlay");
+            });
         });
 
         spawnPortal(k.center().x, k.height() - 200, "hub", "HUB");
@@ -464,83 +503,57 @@ k.scene("hub", () => {
     });
 });
 
-// --- DATA & ROOM CREATION ---
+// --- DATA (REVISED FOR TEXT & LINKS ONLY) ---
 
 const inventoryShards = [
-    { name: "Ad Units", frame: 0, desc: "The basic building block of inventory. Represents the space on a site where ads appear.", link: "goo.gle/gam-ad-units" },
-    { name: "Placements", frame: 1, desc: "A collection of one or more ad units where an advertiser's content can be displayed.", link: "goo.gle/gam-placements" },
-    { name: "GPT", frame: 2, desc: "Google Publisher Tag. The tagging library for GAM to dynamically build ad requests.", link: "goo.gle/gam-gpt" },
-    { name: "Sites", frame: 3, desc: "Manage specific domains or apps where you intend to serve ads.", link: "goo.gle/gam-sites" },
-    { name: "Apps", frame: 4, desc: "Configure mobile app inventory to enable SDK-based ad rendering.", link: "goo.gle/gam-apps" },
-    { name: "URLs", frame: 5, desc: "Target specific content paths or deep-links within your web properties.", link: "goo.gle/gam-urls" },
-    { name: "Key-Values", frame: 6, desc: "Custom targeting variables like 'category=sports' for surgical targeting.", link: "goo.gle/gam-key-values" },
-    { name: "Audiences", frame: 7, desc: "Groups of users based on interests or behavior across properties.", link: "goo.gle/gam-audiences" },
-    { name: "Pricing Rules", frame: 8, desc: "Floor prices ensure you never sell inventory for less than it's worth.", link: "goo.gle/gam-pricing" },
-    { name: "Inventory Rules", frame: 9, desc: "Define exclusions and overrides to control what demand fills your space.", link: "goo.gle/gam-rules" }
+    { name: "Ad Units", frame: 0, desc: "The basic building block of inventory. It represents the space on your site where ads appear. Check sizes carefully to avoid mismatches.", link: "https://admanager.google.com/15184186#inventory/ad_unit/list" },
+    { name: "Placements", frame: 1, desc: "Groups of ad units where an advertiser's content can be displayed. Used heavily to organize logical areas of a site.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
+    { name: "GPT", frame: 2, desc: "Google Publisher Tag. The tagging library for GAM used to dynamically build ad requests after the wrapper finishes its auction.", link: "https://developers.google.com/publisher-tag/guides/learn-basics" },
+    { name: "Sites", frame: 3, desc: "Manage specific domains or apps where you intend to serve ads to maintain inventory quality.", link: "https://support.google.com/admanager/answer/10130765" },
+    { name: "Key-Values", frame: 4, desc: "Custom targeting variables (e.g., article_id=123). Prebid injects winning bid data into GPT as KVP before the GAM auction.", link: "https://docs.prebid.org/adops/key-values.html" },
+    { name: "Audiences", frame: 5, desc: "1st & 3rd party audience segments, custom audience segments, retargeting, and key-value audience targeting profiles.", link: "https://support.google.com/google-ads/answer/7538811" },
+    { name: "Pricing Rules", frame: 6, desc: "Manage pricing rules and first look floors to ensure you never sell inventory programmatically for less than it's worth.", link: "https://support.google.com/admanager/answer/9298008" }
 ];
 
 const deliveryShards = [
-    { name: "Orders", frame: 0, desc: "An agreement between a publisher and advertiser to run a campaign.", link: "goo.gle/gam-orders" },
-    { name: "Line Items", frame: 1, desc: "Defines specific dates, targeting, and pricing for ad delivery.", link: "goo.gle/gam-line-items" },
-    { name: "Creatives", frame: 2, desc: "The actual ad media (image, video, HTML5) served to users.", link: "goo.gle/gam-creatives" },
-    { name: "Targeting", frame: 3, desc: "Criteria like geo, device, or audience to ensure ads reach the right users.", link: "goo.gle/gam-targeting" },
-    { name: "Delivery Settings", frame: 4, desc: "Controls for pacing and display adjustments across campaigns.", link: "goo.gle/gam-delivery-settings" },
-    { name: "Prioritization", frame: 5, desc: "Determines which line item serves first based on assigned tiers.", link: "goo.gle/gam-prioritization" },
-    { name: "Forecasting", frame: 6, desc: "Predicts future inventory availability to prevent overselling.", link: "goo.gle/gam-forecasting" },
-    { name: "Freq Capping", frame: 7, desc: "Limits how many times a user sees the same ad to prevent fatigue.", link: "goo.gle/gam-freq-cap" },
-    { name: "Delivery Tools", frame: 8, desc: "Troubleshooting utilities to inspect why an ad did or didn't deliver.", link: "goo.gle/gam-delivery-tools" }
+    { name: "Orders & Line Items", frame: 0, desc: "Create and manage orders, line items, and creatives. The Ad Decision Engine compiles and selects eligible campaigns based on these.", link: "https://support.google.com/admanager/answer/9405477" },
+    { name: "Creatives", frame: 1, desc: "Manage a wide range of creative formats including standard display, HTML5, VAST support for video, and rich media.", link: "https://support.google.com/admanager/answer/3185155" },
+    { name: "Targeting", frame: 2, desc: "Adjust line items with dayparting, device, geography, and specific audience targeting inclusions and exclusions.", link: "https://support.google.com/admanager/answer/9766929" },
+    { name: "Prioritization", frame: 3, desc: "Prioritize line items for reserved vs. non-reserved delivery. Sponsorships (4) trump Standard (8) and Price Priority (12).", link: "https://support.google.com/admanager/answer/177279" },
+    { name: "Forecasting", frame: 4, desc: "Forecast inventory availability for selling, or review the delivery forecast during an active campaign to optimize pacing.", link: "https://support.google.com/admanager/answer/7649125" },
+    { name: "Freq Capping", frame: 5, desc: "Adjust line items with frequency caps to prevent budget waste and user ad-fatigue by limiting impressions per user.", link: "https://support.google.com/admanager/answer/7085745" },
+    { name: "Delivery Tools", frame: 6, desc: "The GAM Delivery Inspector is a powerful troubleshooting console used to debug HTTP requests and discover why a line item lost an auction.", link: "N/A" }
 ];
 
 const insightsShards = [
-    { name: "Impressions", frame: 0, desc: "The number of times an ad is fetched and displayed to a user.", link: "goo.gle/gam-impressions" },
-    { name: "CTR", frame: 1, desc: "Click-Through Rate; percentage of impressions that resulted in a click.", link: "goo.gle/gam-ctr" },
-    { name: "Fill Rate", frame: 2, desc: "The percentage of ad requests that successfully returned an ad.", link: "goo.gle/gam-fill-rate" },
-    { name: "Viewability", frame: 3, desc: "Measures whether an ad was actually seen by a human user.", link: "goo.gle/gam-viewability" },
-    { name: "Reach", frame: 4, desc: "The number of unique visitors or devices exposed to a campaign.", link: "goo.gle/gam-reach" },
-    { name: "VCR", frame: 5, desc: "Video Completion Rate; percentage of users who watched to the end.", link: "goo.gle/gam-vcr" },
-    { name: "Revenue", frame: 6, desc: "Total earnings generated from ad placements across channels.", link: "goo.gle/gam-revenue" },
-    { name: "Buyers", frame: 7, desc: "Dimension to analyze performance by specific advertisers or DSPs.", link: "goo.gle/gam-buyers" },
-    { name: "Formats", frame: 8, desc: "Tracks performance across display, video, native, and other types.", link: "goo.gle/gam-formats" },
-    { name: "Devices", frame: 9, desc: "Analyzes metrics split by desktop, mobile, tablet, and CTV.", link: "goo.gle/gam-devices" }
+    { name: "Impressions & Fill", frame: 0, desc: "Track base metrics like impressions, clicks, CTR, revenue, and fill rate to diagnose overall site yield performance.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Viewability", frame: 1, desc: "Measures whether an ad was actually seen by a human user using JavaScript tracking pixels and strict MRC viewability standards.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Reach & VCR", frame: 2, desc: "Advanced reporting using dimensions like reach/frequency, audience insights, and Video Completion Rate.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Buyers & Devices", frame: 3, desc: "Analyze revenue performance by specific buyer, device, or format to identify optimization opportunities across fragmented data.", link: "N/A" }
 ];
 
 const programmaticShards = [
-    { name: "Open Auction", frame: 0, desc: "The marketplace where buyers bid on inventory in real-time.", link: "goo.gle/gam-open-auction" },
-    { name: "AdX", frame: 1, desc: "Google Ad Exchange, a premium programmatic marketplace.", link: "goo.gle/gam-adx" },
-    { name: "Open Bidding", frame: 2, desc: "Server-side header bidding solution native within GAM.", link: "goo.gle/gam-open-bidding" },
-    { name: "PMP", frame: 3, desc: "Private Marketplace; invite-only auctions for premium inventory.", link: "goo.gle/gam-pmp" },
-    { name: "Preferred Deal", frame: 4, desc: "A bypassed auction where a buyer gets first look at a fixed price.", link: "goo.gle/gam-preferred-deals" },
-    { name: "PG", frame: 5, desc: "Programmatic Guaranteed; automated direct buys with reserved inventory.", link: "goo.gle/gam-pg" },
-    { name: "Unified Auction", frame: 6, desc: "Simultaneous competition between AdX and Open Bidding.", link: "goo.gle/gam-unified-auction" },
-    { name: "Header Bidding", frame: 7, desc: "Client-side pre-bidding to increase demand competition.", link: "goo.gle/gam-header-bidding" },
-    { name: "Yield Groups", frame: 8, desc: "Groups of ad networks and exchanges competing for inventory.", link: "goo.gle/gam-yield-groups" },
-    { name: "Protections", frame: 9, desc: "Rules to prevent specific ads or categories from showing on your site.", link: "goo.gle/gam-protections" },
-    { name: "Blocking", frame: 0, desc: "Excluding specific advertiser URLs or brands for brand safety.", link: "goo.gle/gam-blocking" }
+    { name: "Open Auction & AdX", frame: 0, desc: "The real-time marketplace where buyers bid on unreserved inventory. Understanding RTB protocols is key to optimizing bid density and latency.", link: "https://iabtechlab.com/standards/openrtb" },
+    { name: "Header Bidding", frame: 1, desc: "The architecture of client-side vs. server-side bidding. Prebid enables concurrent auctions to evaluate demand before the ad server decides.", link: "https://docs.prebid.org/overview/intro.html" },
+    { name: "PMP & PG Deals", frame: 2, desc: "The evolution of direct sales into automated logic. Manage fixed-price agreements and Deal IDs for premium, reserved inventory execution.", link: "https://support.google.com/admanager/answer/7510110" },
+    { name: "Unified Auction", frame: 3, desc: "The transition to first-price auctions, ensuring AdX competes concurrently with Header Bidding and Yield Groups on a level playing field.", link: "https://support.google.com/admanager/answer/9266670" },
+    { name: "Protections", frame: 4, desc: "Safeguard brand safety by setting strict rules for advertiser URL exclusions, sensitive categories, and preventing fraudulent ad activity.", link: "https://support.google.com/admanager/answer/7063071" }
 ];
 
 const privacyShards = [
-    { name: "GDPR", frame: 0, desc: "General Data Protection Regulation compliance tools for EU users.", link: "goo.gle/gam-gdpr" },
-    { name: "GPP", frame: 1, desc: "Global Privacy Platform framework for standardizing consent.", link: "goo.gle/gam-gpp" },
-    { name: "MSPA", frame: 2, desc: "Multi-State Privacy Agreement tools for US state regulations.", link: "goo.gle/gam-mspa" },
-    { name: "LTD Ads", frame: 3, desc: "Serving non-personalized ads when user consent is restricted.", link: "goo.gle/gam-ltd-ads" },
-    { name: "Data Controls", frame: 4, desc: "Settings to restrict how GAM uses data for ad personalization.", link: "goo.gle/gam-data-controls" }
+    { name: "GDPR, GPP, MSPA", frame: 0, desc: "The global frameworks dictating user consent. Learn how Consent Management Platforms (CMPs) interact with the IAB TCF parameters.", link: "https://support.google.com/admanager/answer/9805367" },
+    { name: "LTD Ads", frame: 1, desc: "Navigating the shift away from third-party cookies by serving ads using contextual signals, the Privacy Sandbox, and Topics API.", link: "https://support.google.com/admanager/answer/11559288" },
+    { name: "Data Controls", frame: 2, desc: "Network-level toggles restricting data usage, and the role of Data Clean Rooms (like Ads Data Hub) for privacy-centric attribution matching.", link: "https://developers.google.com/ads-data-hub" }
 ];
 
 const adminShards = [
-    { name: "Users", frame: 0, desc: "Manage individual access to the GAM network.", link: "goo.gle/gam-users" },
-    { name: "Roles", frame: 1, desc: "Define permissions and access levels for specific user groups.", link: "goo.gle/gam-roles" },
-    { name: "Teams", frame: 2, desc: "Restrict access to specific orders or inventory by grouping users.", link: "goo.gle/gam-teams" },
-    { name: "Network Settings", frame: 3, desc: "Global configurations for your entire GAM instance.", link: "goo.gle/gam-network" },
-    { name: "Linked Accounts", frame: 4, desc: "Connect AdSense, Ad Exchange, or Analytics directly to GAM.", link: "goo.gle/gam-linked-accounts" },
-    { name: "API", frame: 5, desc: "Access settings for programmatic integrations and external tools.", link: "goo.gle/gam-api" },
-    { name: "Billing", frame: 6, desc: "Manage invoices, payments, and financial reporting.", link: "goo.gle/gam-billing" },
-    { name: "CRM/DMP", frame: 7, desc: "Integrate first-party data and customer data platforms.", link: "goo.gle/gam-crm" },
-    { name: "Ads.txt", frame: 8, desc: "Authorized Digital Sellers file to prevent domain spoofing and fraud.", link: "goo.gle/gam-ads-txt" },
-    { name: "MCM", frame: 9, desc: "Multiple Customer Management for delegated network access.", link: "goo.gle/gam-mcm" },
-    { name: "Policy Center", frame: 0, desc: "Monitor and resolve ad serving policy violations.", link: "goo.gle/gam-policy" }
+    { name: "Users & Roles", frame: 0, desc: "Establish governance with custom permission matrices to secure network access, restrict order visibility, and reduce human error.", link: "https://support.google.com/admanager/answer/60220" },
+    { name: "Linked Accounts", frame: 1, desc: "Eliminate data silos by centralizing analytics. Connect Google Analytics 4, AdSense, and AdX directly to your GAM instance.", link: "https://support.google.com/admanager/answer/11186985" },
+    { name: "API & CRM", frame: 2, desc: "Access settings for programmatic automation. Utilize server-to-server APIs to synchronize first-party data and external ops tools.", link: "https://developers.google.com/ad-manager/api/start" },
+    { name: "Ads.txt & MCM", frame: 3, desc: "Prevent domain spoofing and manage parent/child publisher delegation through Multiple Customer Management and Authorized Digital Sellers.", link: "https://support.google.com/admanager/answer/9335447" },
+    { name: "Policy Center", frame: 4, desc: "Monitor and resolve automated quality control flags. Keep inventory monetizable by staying compliant with Google's ad serving restrictions.", link: "https://support.google.com/admanager/answer/9206775" }
 ];
 
-// Compile all rooms
 // Compile all rooms
 createRoom("inventory", "KYLE", getFrame(2, 8), "Inventory Cat", [
     "Welcome! I'm Kyle, EVP of Operations!", 
@@ -566,17 +579,16 @@ createRoom("programmatic", "DAVID", getFrame(2, 9), "Programmatic Cat", [
     "Touch the shards of programmatic to run the high-speed marketplace."
 ], programmaticShards);
 
-createRoom("privacy", "RYAN", getFrame(8, 3), "Privacy Cat", [
+createRoom("privacy", "RYAN", getFrame(4, 8), "Privacy Cat", [
     "I'm Ryan, Program Manager of Publisher Operations.", 
     "Here is a Cat of Knowledge to guide you safely forward.", 
     "Touch the shards of privacy to keep our data secure and legal."
 ], privacyShards);
 
-createRoom("admin", "KURT", getFrame(9, 1), "Admin Cat", [
+createRoom("admin", "KURT", getFrame(1, 9), "Admin Cat", [
     "I'm Kurt, CEO.", 
     "I'll provide you with the last Cat Of Knowledge you need to complete your journey.", 
     "Touch the shards of administration to configure the network."
 ], adminShards);
-
 
 k.go("intro");
