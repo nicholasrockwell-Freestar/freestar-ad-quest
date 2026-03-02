@@ -8,15 +8,31 @@ const k = kaplay({
 // --- ASSETS ---
 k.loadSprite("rogue", "assets/rogue.png");
 k.loadSprite("prebidWinner", "assets/prebid_winner.png");
-k.loadSprite("cat", "assets/cat.png"); 
-k.loadSprite("scroll", "assets/scroll.png", {
-    slice9: { left: 12, right: 12, top: 12, bottom: 12 }
-});
 k.loadSprite("main_tiles", "assets/tilemap.png", { sliceX: 12, sliceY: 11 });
 
-k.loadSprite("crystals", "assets/crystals.png", {
-    sliceX: 10, 
+// --- NEW CAT ASSETS ---
+// Array of all your cat filenames (ensuring precise spelling matches)
+const catList = [
+    "BatmanCat", "BlackCat", "BlackCollorCat", "BrownCat", "DarkCat", 
+    "EgyptCat", "MultiCat", "PinkCollorCat", "PirateCat", "SiameseCat", 
+    "TigerCat", "VampireCat", "WhiteCat", "WizardCat"
+];
+
+// Dynamically load all cats and slice them by 3 to isolate the frames
+catList.forEach(cat => {
+    k.loadSprite(cat, `assets/cats/${cat}.png`, { sliceX: 3 });
 });
+
+// Map specific cats to the specific Badges/Rooms for the Inventory HUD
+const badgeToCat = {
+    "Inventory Cat": "WizardCat",
+    "Delivery Cat": "PirateCat",
+    "Insights Cat": "SiameseCat",
+    "Programmatic Cat": "BatmanCat",
+    "Privacy Cat": "VampireCat",
+    "Admin Cat": "EgyptCat",
+    "Ad Servers Cat": "TigerCat" 
+};
 
 // --- GLOBAL STATE ---
 const gameState = {
@@ -32,10 +48,10 @@ const state = {
         updateInventoryHUD();
     },
     hasBadge: (name) => gameState.badges.has(name),
-    allBadgesCollected: () => gameState.badges.size >= 6, 
+    allBadgesCollected: () => gameState.badges.size >= 7, // Updated to 7 Cats
 };
 
-// --- VISION SYSTEM (CLICKABLE HYPERLINK & TEXT ONLY) ---
+// --- VISION SYSTEM (POLISHED UI BOX & LINKS) ---
 function showVision(data) {
     k.destroyAll("vision-overlay"); 
 
@@ -44,11 +60,13 @@ function showVision(data) {
     const boxWidth = 600;
     const boxHeight = 400; 
 
-    // The Background Scroll
+    // The Background UI Box (Replaces scroll.png with a clean, artifact-free rect)
     ui.add([
-        k.sprite("scroll", { width: boxWidth, height: boxHeight }),
+        k.rect(boxWidth, boxHeight),
         k.pos(k.center()),
         k.anchor("center"),
+        k.color(46, 15, 58), // Deep Purple matching the HTML HUD (#2E0F3A)
+        k.outline(4, k.rgb(220, 146, 0)), // Gold border matching the HTML HUD (#DC9200)
         k.z(301) 
     ]);
 
@@ -57,16 +75,16 @@ function showVision(data) {
         k.text(data.name.toUpperCase(), { size: 18, font: "'Press Start 2P'", width: boxWidth - 80, align: "center" }),
         k.pos(k.center().x, k.center().y - 140),
         k.anchor("center"),
-        k.color(0, 183, 137),
+        k.color(255, 223, 0), // Gold text to pop against purple
         k.z(302) 
     ]);
 
-    // The Description (Expanded for all crystals)
+    // The Description
     ui.add([
         k.text(data.desc, { size: 12, font: "'Press Start 2P'", width: boxWidth - 100, lineSpacing: 10, align: "center" }),
         k.pos(k.center().x, k.center().y - 30),
         k.anchor("center"),
-        k.color(46, 15, 58),
+        k.color(255, 255, 255), // White text for readability
         k.z(302) 
     ]);
 
@@ -76,25 +94,22 @@ function showVision(data) {
             k.text("CLICK HERE FOR RESOURCE ->", { size: 12, font: "'Press Start 2P'" }),
             k.pos(k.center().x, k.center().y + 80),
             k.anchor("center"),
-            k.color(0, 0, 255),
-            k.area(), // Gives the text a hitbox for clicking and hovering
+            k.color(0, 183, 137), // Teal blue for interactive link
+            k.area(), 
             k.z(302),
             "resource-link"
         ]);
 
-        // Hover Effects
         linkBtn.onHoverUpdate(() => {
             k.setCursor("pointer");
-            linkBtn.color = k.rgb(0, 150, 255); // Lightens blue on hover
+            linkBtn.color = k.rgb(0, 255, 200); // Lighter teal on hover
         });
         linkBtn.onHoverEnd(() => {
             k.setCursor("default");
-            linkBtn.color = k.rgb(0, 0, 255); // Returns to dark blue
+            linkBtn.color = k.rgb(0, 183, 137); 
         });
 
-        // Click Action
         linkBtn.onClick(() => {
-            // Ensure the URL has https:// so the browser opens it externally
             let url = data.link.startsWith("http") ? data.link : "https://" + data.link;
             window.open(url, "_blank");
         });
@@ -103,7 +118,7 @@ function showVision(data) {
             k.text("NO RESOURCE LINK AVAILABLE", { size: 10, font: "'Press Start 2P'" }),
             k.pos(k.center().x, k.center().y + 80),
             k.anchor("center"),
-            k.color(150, 150, 150),
+            k.color(150, 150, 150), // Gray if not available
             k.z(302) 
         ]);
     }
@@ -113,7 +128,7 @@ function showVision(data) {
         k.text("WALK AWAY TO CLOSE", { size: 10, font: "'Press Start 2P'" }),
         k.pos(k.center().x, k.center().y + 150),
         k.anchor("center"),
-        k.color(100, 100, 100),
+        k.color(150, 150, 150),
         k.z(302) 
     ]);
 }
@@ -165,10 +180,13 @@ function showLoopingDialogue(speaker, messages, index) {
     const FIXED_HEIGHT = 160;
     const boxY = k.height() - (FIXED_HEIGHT / 2) - 40;
 
+    // Cleaned up Dialogue Background matching the HUD
     k.add([
-        k.sprite("scroll", { width: k.width() - 320, height: FIXED_HEIGHT }),
+        k.rect(k.width() - 320, FIXED_HEIGHT),
         k.pos(k.center().x - 125, boxY), 
         k.anchor("center"), 
+        k.color(46, 15, 58), // Deep purple
+        k.outline(4, k.rgb(220, 146, 0)), // Gold border
         k.fixed(), 
         k.z(100), 
         "dialogue-ui"
@@ -176,8 +194,8 @@ function showLoopingDialogue(speaker, messages, index) {
 
     k.add([
         k.text(speaker, { size: 18, font: "'Press Start 2P'" }),
-        k.pos(80, boxY - (FIXED_HEIGHT / 2)), 
-        k.color(255, 223, 0), 
+        k.pos(80, boxY - (FIXED_HEIGHT / 2) + 20), 
+        k.color(255, 223, 0), // Gold name
         k.fixed(), 
         k.z(101), 
         "dialogue-ui"
@@ -185,9 +203,9 @@ function showLoopingDialogue(speaker, messages, index) {
 
     k.add([
         k.text(message, { size: 14, width: k.width() - 250, lineSpacing: 8, font: "'Press Start 2P'" }),
-        k.pos(k.center().x - 50, boxY + 10), 
+        k.pos(k.center().x - 50, boxY + 15), 
         k.anchor("center"), 
-        k.color(46, 15, 58), 
+        k.color(255, 255, 255), // White text
         k.fixed(), 
         k.z(101), 
         "dialogue-ui"
@@ -197,7 +215,7 @@ function showLoopingDialogue(speaker, messages, index) {
         k.text("SPACE TO CYCLE >", { size: 10, font: "'Press Start 2P'" }),
         k.pos(k.width() - 300, boxY + (FIXED_HEIGHT / 2) - 25), 
         k.anchor("right"), 
-        k.color(0,0,0), 
+        k.color(150, 150, 150), // Light gray instruction
         k.fixed(), 
         k.z(101), 
         "dialogue-ui"
@@ -238,22 +256,26 @@ function addLargeEnvironment(k) {
     }
 }
 
-// Updated HUD to show Cats instead of text badges
+// Updated HUD to render dynamically mapped Cats for each specific room
 function updateInventoryHUD() {
     const list = document.getElementById("tool-list");
     if (list) {
-        list.innerHTML = Array.from(gameState.badges).map(b => 
-            `<div class="tool-item" style="text-align: center;">
-                <img src="assets/cat.png" style="width: 32px; height: 32px; display: block; margin: 0 auto;">
+        list.innerHTML = Array.from(gameState.badges).map(b => {
+            const catImg = badgeToCat[b] || "BlackCat"; // Fallback to BlackCat if not mapped
+            return `
+            <div class="tool-item" style="text-align: center;">
+                <div style="width: 64px; height: 64px; overflow: hidden; margin: 0 auto; position: relative;">
+                    <img src="assets/cats/${catImg}.png" style="height: 100%; width: auto; position: absolute; left: 0; image-rendering: pixelated;">
+                </div>
                 <span style="font-size: 8px;">${b}</span>
-            </div>`
-        ).join("");
+            </div>`;
+        }).join("");
     }
 }
 
 function spawnPlayer(posX, posY) {
     const player = k.add([
-        k.sprite("main_tiles", { frame: getFrame(1, 8) }), 
+        k.sprite("main_tiles", { frame: getFrame(5, 9) }), 
         k.pos(posX ?? k.center().x, posY ?? k.center().y),
         k.anchor("center"), 
         k.scale(3), 
@@ -350,7 +372,7 @@ function spawnExitDoor(centerX, exitY) {
     const exitSensor = k.add([ k.rect(225, 225), k.pos(centerX, exitY), k.anchor("center"), k.area(), k.opacity(0) ]);
     exitSensor.onCollide("player", () => {
         if (!isUnlocked) {
-            showLoopingDialogue("SYSTEM", ["LEVELLING-UP IS NOT SO CHEAP, RETURN WITH 6 CATS OF KNOWLEDGE TO EARN YOUR KEEP."], 0);
+            showLoopingDialogue("SYSTEM", ["LEVELLING-UP IS NOT SO CHEAP, RETURN WITH 7 CATS OF KNOWLEDGE TO EARN YOUR KEEP."], 0);
         }
     });
     exitSensor.onCollideEnd("player", () => k.destroyAll("dialogue-ui"));
@@ -420,10 +442,13 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
             if(i >= positions.length) return; 
             const pos = positions[i];
             
+            // Randomly select one of the cats from the array
+            const randomCat = catList[Math.floor(Math.random() * catList.length)];
+            
             const shard = k.add([
-                k.sprite("crystals", { frame: s.frame }),
+                k.sprite(randomCat, { frame: 0 }), 
                 k.pos(pos.x, pos.y),
-                k.scale(1),
+                k.scale(2.5), 
                 k.z(45), 
                 k.area(), 
                 k.body({ isStatic: true }), 
@@ -431,13 +456,13 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
                 { data: s }
             ]);
             
-            const labelY = pos.y + 60; 
+            const labelY = pos.y + 90; 
             const textSize = 10;
             const padding = 10;
             const txt = k.make([k.text(s.name, { size: textSize, font: "'Press Start 2P'" })]);
 
             k.add([
-                k.rect(txt.width + padding, txt.height + padding),
+                k.rect(txt.width + 20 + padding, txt.height + padding),
                 k.pos(pos.x + 30, labelY),
                 k.anchor("center"),
                 k.color(0, 0, 0),
@@ -454,7 +479,7 @@ const createRoom = (name, expertName, frame, badge, lines, shardsData) => {
 
             shard.onCollide("player", () => showVision(s));
             shard.onCollideEnd("player", () => {
-                k.setCursor("default"); // Failsafe to ensure cursor returns to normal when walking away
+                k.setCursor("default"); 
                 k.destroyAll("vision-overlay");
             });
         });
@@ -483,17 +508,21 @@ k.scene("hub", () => {
     const player = spawnPlayer(spawnX, spawnY);
     setControls(player);
 
-    const doorY = 180;
+    const doorY = 220;
     const startX = k.center().x - 350; 
     const spacing = 140; 
     const scale = 3.5;
 
+    // Original Top Wall Doors
     spawnPortal(startX, doorY, "inventory", "INVENTORY", scale);
     spawnPortal(startX + spacing, doorY, "delivery", "DELIVERY", scale);
     spawnPortal(startX + spacing * 2, doorY, "reporting", "INSIGHTS", scale);
     spawnPortal(startX + spacing * 3, doorY, "programmatic", "AD EXCHANGE", scale);
     spawnPortal(startX + spacing * 4, doorY, "privacy", "PRIVACY", scale);
     spawnPortal(startX + spacing * 5, doorY, "admin", "ADMIN", scale);
+
+    // New Left Wall Door for Ad Servers
+    spawnPortal(k.center().x - 380, k.center().y, "adservers", "AD SERVERS", scale);
 
     spawnExitDoor(k.center().x, k.height() - 200);
 
@@ -503,92 +532,105 @@ k.scene("hub", () => {
     });
 });
 
-// --- DATA (REVISED FOR TEXT & LINKS ONLY) ---
-
+// --- DATA (FREESTAR SPECIFIC FOCUS) ---
 const inventoryShards = [
-    { name: "Ad Units", frame: 0, desc: "The basic building block of inventory. It represents the space on your site where ads appear. Check sizes carefully to avoid mismatches.", link: "https://admanager.google.com/15184186#inventory/ad_unit/list" },
-    { name: "Placements", frame: 1, desc: "Groups of ad units where an advertiser's content can be displayed. Used heavily to organize logical areas of a site.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
-    { name: "GPT", frame: 2, desc: "Google Publisher Tag. The tagging library for GAM used to dynamically build ad requests after the wrapper finishes its auction.", link: "https://developers.google.com/publisher-tag/guides/learn-basics" },
-    { name: "Sites", frame: 3, desc: "Manage specific domains or apps where you intend to serve ads to maintain inventory quality.", link: "https://support.google.com/admanager/answer/10130765" },
-    { name: "Key-Values", frame: 4, desc: "Custom targeting variables (e.g., article_id=123). Prebid injects winning bid data into GPT as KVP before the GAM auction.", link: "https://docs.prebid.org/adops/key-values.html" },
-    { name: "Audiences", frame: 5, desc: "1st & 3rd party audience segments, custom audience segments, retargeting, and key-value audience targeting profiles.", link: "https://support.google.com/google-ads/answer/7538811" },
-    { name: "Pricing Rules", frame: 6, desc: "Manage pricing rules and first look floors to ensure you never sell inventory programmatically for less than it's worth.", link: "https://support.google.com/admanager/answer/9298008" }
+    { name: "Ad Units", frame: 0, desc: "The foundation of inventory. In GAM, these must precisely match the Pubfig configurations (e.g., lipsumcom_right_siderail_2) or bids will drop.", link: "https://admanager.google.com/15184186#inventory/ad_unit/list" },
+    { name: "Placements", frame: 1, desc: "How we group ad units logically. You can view the specific placements Pubfig is expecting on a page by typing 'freestar.fsdata.placements' in the console.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
+    { name: "GPT", frame: 2, desc: "The Google Publisher Tag. Pubfig pauses GPT, runs the Prebid auction, injects the winning Key-Values, and then finally lets GPT call GAM with the winner.", link: "https://developers.google.com/publisher-tag/guides/learn-basics" },
+    { name: "Sites", frame: 3, desc: "Domain management. Before a Pub goes live, we must ensure the site is approved in GAM and MCM is fully established to maintain inventory quality.", link: "https://support.google.com/admanager/answer/10130765" },
+    { name: "Key-Values", frame: 4, desc: "How Prebid talks to GAM. Pubfig injects winning bid data (like hb_pb=2.10 or hb_bidder=rubicon) so GAM can decision against AdX.", link: "https://docs.prebid.org/adops/key-values.html" },
+    { name: "Audiences", frame: 5, desc: "Identity integration. We use the wrapper to pass first-party data and identity solutions (like LiveRamp or UID2) to enrich the bid request for SSPs.", link: "https://support.google.com/google-ads/answer/7538811" },
+    { name: "Pricing Rules", frame: 6, desc: "Unified Pricing Rules (UPRs). Freestar Yield Ops actively manages these to balance overall fill rate against premium CPMs across AdX and Header Bidding.", link: "https://support.google.com/admanager/answer/9298008" }
 ];
 
 const deliveryShards = [
-    { name: "Orders & Line Items", frame: 0, desc: "Create and manage orders, line items, and creatives. The Ad Decision Engine compiles and selects eligible campaigns based on these.", link: "https://support.google.com/admanager/answer/9405477" },
-    { name: "Creatives", frame: 1, desc: "Manage a wide range of creative formats including standard display, HTML5, VAST support for video, and rich media.", link: "https://support.google.com/admanager/answer/3185155" },
-    { name: "Targeting", frame: 2, desc: "Adjust line items with dayparting, device, geography, and specific audience targeting inclusions and exclusions.", link: "https://support.google.com/admanager/answer/9766929" },
-    { name: "Prioritization", frame: 3, desc: "Prioritize line items for reserved vs. non-reserved delivery. Sponsorships (4) trump Standard (8) and Price Priority (12).", link: "https://support.google.com/admanager/answer/177279" },
-    { name: "Forecasting", frame: 4, desc: "Forecast inventory availability for selling, or review the delivery forecast during an active campaign to optimize pacing.", link: "https://support.google.com/admanager/answer/7649125" },
-    { name: "Freq Capping", frame: 5, desc: "Adjust line items with frequency caps to prevent budget waste and user ad-fatigue by limiting impressions per user.", link: "https://support.google.com/admanager/answer/7085745" },
-    { name: "Delivery Tools", frame: 6, desc: "The GAM Delivery Inspector is a powerful troubleshooting console used to debug HTTP requests and discover why a line item lost an auction.", link: "N/A" }
+    { name: "Orders & Line Items", frame: 0, desc: "We rely heavily on automation and APIs to build and manage the thousands of Prebid line items required to catch every price bucket.", link: "https://support.google.com/admanager/answer/9405477" },
+    { name: "Creatives", frame: 1, desc: "Beyond standard display, this is where we manage our highly custom outstream, sticky video players, and high-impact rich media templates.", link: "https://support.google.com/admanager/answer/3185155" },
+    { name: "Targeting", frame: 2, desc: "Used heavily by Yield to restrict direct-sold campaigns to specific wrapper setups, geographics, or premium Freestar inventory.", link: "https://support.google.com/admanager/answer/9766929" },
+    { name: "Prioritization", frame: 3, desc: "The yield waterfall. Direct-Sold sits high at \nSponsorship (4) \nor \nStandard (8) \nwhile our programmatic Header Bidding sits at: \nPrice Priority (12).", link: "https://support.google.com/admanager/answer/177279" },
+    { name: "Forecasting", frame: 4, desc: "Predicting if a publisher's specific placement has enough projected volume to fulfill a custom PMP deal without underdelivering.", link: "https://support.google.com/admanager/answer/7649125" },
+    { name: "Freq Capping", frame: 5, desc: "Protecting the user experience. We use capping to ensure high-impact units don't aggressively fatigue the publisher's audience.", link: "https://support.google.com/admanager/answer/7085745" },
+    { name: "Delivery Tools", frame: 6, desc: "Troubleshooting lifesavers. This tool can help us figure out exactly why an ad unit isn't winning or serving as expected.", link: "https://admanager.google.com/15184186#troubleshooting/websd" }
 ];
 
 const insightsShards = [
-    { name: "Impressions & Fill", frame: 0, desc: "Track base metrics like impressions, clicks, CTR, revenue, and fill rate to diagnose overall site yield performance.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
-    { name: "Viewability", frame: 1, desc: "Measures whether an ad was actually seen by a human user using JavaScript tracking pixels and strict MRC viewability standards.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
-    { name: "Reach & VCR", frame: 2, desc: "Advanced reporting using dimensions like reach/frequency, audience insights, and Video Completion Rate.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
-    { name: "Buyers & Devices", frame: 3, desc: "Analyze revenue performance by specific buyer, device, or format to identify optimization opportunities across fragmented data.", link: "N/A" }
+    { name: "Impressions & Fill", frame: 0, desc: "The core yield metrics. We constantly monitor these to hunt down reporting discrepancies between Pubfig, GAM, upstream analytics, and publisher analytics.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Viewability", frame: 1, desc: "A massive KPI for premium buyers. We optimize lazy loading and smart refresh logic in Pubfig to boost Active View percentages.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Reach & VCR", frame: 2, desc: "Video Completion Rate. Essential for our outstream and instream demand partners to ensure users are actually watching the creatives.", link: "https://www.pathlabs.com/blog/cpm-vs-cpc-vs-cpa" },
+    { name: "Buyers & Devices", frame: 3, desc: "Used to diagnose granular issues, like why a specific SSP (e.g., Magnite or Index Exchange) is underperforming on Mobile Web vs Desktop.", link: "N/A" }
 ];
 
 const programmaticShards = [
-    { name: "Open Auction & AdX", frame: 0, desc: "The real-time marketplace where buyers bid on unreserved inventory. Understanding RTB protocols is key to optimizing bid density and latency.", link: "https://iabtechlab.com/standards/openrtb" },
-    { name: "Header Bidding", frame: 1, desc: "The architecture of client-side vs. server-side bidding. Prebid enables concurrent auctions to evaluate demand before the ad server decides.", link: "https://docs.prebid.org/overview/intro.html" },
-    { name: "PMP & PG Deals", frame: 2, desc: "The evolution of direct sales into automated logic. Manage fixed-price agreements and Deal IDs for premium, reserved inventory execution.", link: "https://support.google.com/admanager/answer/7510110" },
-    { name: "Unified Auction", frame: 3, desc: "The transition to first-price auctions, ensuring AdX competes concurrently with Header Bidding and Yield Groups on a level playing field.", link: "https://support.google.com/admanager/answer/9266670" },
-    { name: "Protections", frame: 4, desc: "Safeguard brand safety by setting strict rules for advertiser URL exclusions, sensitive categories, and preventing fraudulent ad activity.", link: "https://support.google.com/admanager/answer/7063071" }
+    { name: "Open Auction & AdX", frame: 0, desc: "The baseline marketplace. Through MCM, Freestar provides smaller publishers access to premium Google AdX demand they couldn't get alone.", link: "https://iabtechlab.com/standards/openrtb" },
+    { name: "Header Bidding", frame: 1, desc: "The secret sauce. Orchestrating Prebid.js to maximize auction density without slowing down the page.", link: "https://docs.prebid.org/overview/intro.html" },
+    { name: "PMP & PG Deals", frame: 2, desc: "Programmatic Direct. Executing high-CPM fixed-price agreements and Deal IDs we've secured.", link: "https://support.google.com/admanager/answer/7510110" },
+    { name: "Unified Auction", frame: 3, desc: "The first-price battleground. Prebid partners must successfully pass their bids to GAM in time to compete directly against AdX's dynamic flooring.", link: "https://support.google.com/admanager/answer/9266670" },
+    { name: "Protections", frame: 4, desc: "Brand safety. Alongside GAM rules, we use The Media Trust to actively block malvertising, redirects, and bad actors.", link: "https://support.google.com/admanager/answer/7063071" }
 ];
 
 const privacyShards = [
-    { name: "GDPR, GPP, MSPA", frame: 0, desc: "The global frameworks dictating user consent. Learn how Consent Management Platforms (CMPs) interact with the IAB TCF parameters.", link: "https://support.google.com/admanager/answer/9805367" },
-    { name: "LTD Ads", frame: 1, desc: "Navigating the shift away from third-party cookies by serving ads using contextual signals, the Privacy Sandbox, and Topics API.", link: "https://support.google.com/admanager/answer/11559288" },
-    { name: "Data Controls", frame: 2, desc: "Network-level toggles restricting data usage, and the role of Data Clean Rooms (like Ads Data Hub) for privacy-centric attribution matching.", link: "https://developers.google.com/ads-data-hub" }
+    { name: "GDPR, GPP, MSPA", frame: 0, desc: "Global consent. We integrate CMPs (like SourcePoint or OneTrust) directly with the Pubfig to ensure we only fire legal bid requests.", link: "https://support.google.com/admanager/answer/9805367" },
+    { name: "LTD Ads", frame: 1, desc: "The cookieless concept. Testing the Privacy Sandbox, Topics API, and contextual setups to keep CPMs high when third-party data is restricted.", link: "https://support.google.com/admanager/answer/11559288" },
+    { name: "Data Controls", frame: 2, desc: "Ensuring publisher audience data remains secure and isn't leaked into the bidstream or to SSPs without proper authorization agreements.", link: "https://developers.google.com/ads-data-hub" }
 ];
 
 const adminShards = [
-    { name: "Users & Roles", frame: 0, desc: "Establish governance with custom permission matrices to secure network access, restrict order visibility, and reduce human error.", link: "https://support.google.com/admanager/answer/60220" },
-    { name: "Linked Accounts", frame: 1, desc: "Eliminate data silos by centralizing analytics. Connect Google Analytics 4, AdSense, and AdX directly to your GAM instance.", link: "https://support.google.com/admanager/answer/11186985" },
-    { name: "API & CRM", frame: 2, desc: "Access settings for programmatic automation. Utilize server-to-server APIs to synchronize first-party data and external ops tools.", link: "https://developers.google.com/ad-manager/api/start" },
-    { name: "Ads.txt & MCM", frame: 3, desc: "Prevent domain spoofing and manage parent/child publisher delegation through Multiple Customer Management and Authorized Digital Sellers.", link: "https://support.google.com/admanager/answer/9335447" },
-    { name: "Policy Center", frame: 4, desc: "Monitor and resolve automated quality control flags. Keep inventory monetizable by staying compliant with Google's ad serving restrictions.", link: "https://support.google.com/admanager/answer/9206775" }
+    { name: "Users & Roles", frame: 0, desc: "Access control...", link: "https://support.google.com/admanager/answer/60220" },
+    { name: "Linked Accounts", frame: 1, desc: "Bridging the gap...", link: "https://support.google.com/admanager/answer/11186985" },
+    { name: "API & CRM", frame: 2, desc: "The backbone of our reporting. We utilize GAM APIs to pull raw delivery data.", link: "https://developers.google.com/ad-manager/api/start" },
+    { name: "Ads.txt & MCM", frame: 3, desc: "A constant struggle. Ensuring Freestar's authorized seller list is properly accessible from the Publishers domain.", link: "https://support.google.com/admanager/answer/9335447" },
+    { name: "Policy Center", frame: 4, desc: "The red alert screen. Yield Ops monitors this to resolve sudden 'Two-Click Penalties' or content violations that demonetize Pubs.", link: "https://support.google.com/admanager/answer/9206775" }
+];
+
+// --- NEW SHARDS FOR AD SERVERS ---
+const adServerShards = [
+    { name: "Publisher Ad Server", frame: 0, desc: "Used by publishers to manage yield, host creatives, and decision ads across owned and operated properties. \n\nExamples: Google Ad Manager, Xandr, Magnite", link: "N/A" },
+    { name: "3rd-Party Ad Server", frame: 1, desc: "Used to manage, track, and serve creatives across multiple different publisher sites. \n\nExamples: Campaign Manager 360, Sizmek, Flashtalking, AdButler", link: "N/A" },
+    { name: "DSPs", frame: 2, desc: "Demand Side Platforms. The interface advertisers use to buy inventory across the ecosystem programmatically. \n\nExamples: DV360, The TradeDesk, MediaMath", link: "N/A" },
+    { name: "SSPs", frame: 3, desc: "Supply Side Platforms. The technology publishers use to offer their inventory to multiple DSPs simultaneously. \n\nExamples: Pubmatic, OpenX, Yahoo", link: "N/A" }
 ];
 
 // Compile all rooms
 createRoom("inventory", "KYLE", getFrame(2, 8), "Inventory Cat", [
     "Welcome! I'm Kyle, EVP of Operations!", 
     "Take this Cat of Knowledge to help build your foundation.", 
-    "Touch the shards of inventory to see the blueprints of GAM."
+    "Pet the cats of inventory to see the blueprints of GAM."
 ], inventoryShards);
 
 createRoom("delivery", "PATRICK", getFrame(4, 8), "Delivery Cat", [
     "I'm Patrick, VP of Publisher Support.", 
     "Here is a Cat of Knowledge to keep your delivery on track.", 
-    "Touch the shards of delivery to ensure our ads reach their targets."
+    "Pet the cats of delivery to ensure our ads reach their targets."
 ], deliveryShards);
 
 createRoom("reporting", "CATHENA", getFrame(4, 9), "Insights Cat", [
     "I am Cathena, the Analyst.", 
     "Accept this Cat of Knowledge to help illuminate your path.", 
-    "Touch the shards of insight to turn raw data into strategy."
+    "Pet the cats of insight to turn raw data into strategy."
 ], insightsShards);
 
 createRoom("programmatic", "DAVID", getFrame(2, 9), "Programmatic Cat", [
     "I'm David, AD of Support Engineering.", 
     "Take this Cat of Knowledge to help you master the auction.", 
-    "Touch the shards of programmatic to run the high-speed marketplace."
+    "Pet the cats of programmatic to run the high-speed marketplace."
 ], programmaticShards);
 
 createRoom("privacy", "RYAN", getFrame(4, 8), "Privacy Cat", [
     "I'm Ryan, Program Manager of Publisher Operations.", 
     "Here is a Cat of Knowledge to guide you safely forward.", 
-    "Touch the shards of privacy to keep our data secure and legal."
+    "Pet the cats of privacy to keep our data secure and legal."
 ], privacyShards);
 
 createRoom("admin", "KURT", getFrame(1, 9), "Admin Cat", [
     "I'm Kurt, CEO.", 
     "I'll provide you with the last Cat Of Knowledge you need to complete your journey.", 
-    "Touch the shards of administration to configure the network."
+    "Pet the cats of administration to configure the network."
 ], adminShards);
+
+createRoom("adservers", "MARTIN H.", getFrame(2, 10), "Ad Servers Cat", [
+    "Welcome! I'm Martin H.", 
+    "Take this Cat of Knowledge to navigate the ecosystem.", 
+    "Pet the cats to learn about the different types of ad servers."
+], adServerShards);
 
 k.go("intro");
