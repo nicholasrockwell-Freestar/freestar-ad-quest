@@ -517,7 +517,7 @@ k.scene("hub", () => {
     spawnPortal(startX, doorY, "inventory", "INVENTORY", scale);
     spawnPortal(startX + spacing, doorY, "delivery", "DELIVERY", scale);
     spawnPortal(startX + spacing * 2, doorY, "reporting", "INSIGHTS", scale);
-    spawnPortal(startX + spacing * 3, doorY, "programmatic", "AD EXCHANGE", scale);
+    spawnPortal(startX + spacing * 3, doorY, "programmatic", "Programmatic", scale);
     spawnPortal(startX + spacing * 4, doorY, "privacy", "PRIVACY", scale);
     spawnPortal(startX + spacing * 5, doorY, "admin", "ADMIN", scale);
 
