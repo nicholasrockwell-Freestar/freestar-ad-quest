@@ -535,11 +535,11 @@ k.scene("hub", () => {
 // --- DATA (FREESTAR SPECIFIC FOCUS) ---
 const inventoryShards = [
     { name: "Ad Units", frame: 0, desc: "The foundation of inventory. In GAM, these must precisely match the Pubfig configurations (e.g., lipsumcom_right_siderail_2) or bids will drop.", link: "https://admanager.google.com/15184186#inventory/ad_unit/list" },
-    { name: "Placements", frame: 1, desc: "How we group ad units logically. You can view the specific placements Pubfig is expecting on a page by typing 'freestar.fsdata.placements' in the console.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
+    { name: "Placements", frame: 1, desc: "When a Pub would group a collection of ad units logically for targeting or reporting purposes.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
     { name: "GPT", frame: 2, desc: "The Google Publisher Tag. Pubfig pauses GPT, runs the Prebid auction, injects the winning Key-Values, and then finally lets GPT call GAM with the winner.", link: "https://developers.google.com/publisher-tag/guides/learn-basics" },
     { name: "Sites", frame: 3, desc: "Domain management. Before a Pub goes live, we must ensure the site is approved in GAM and MCM is fully established to maintain inventory quality.", link: "https://support.google.com/admanager/answer/10130765" },
     { name: "Key-Values", frame: 4, desc: "How Prebid talks to GAM. Pubfig injects winning bid data (like hb_pb=2.10 or hb_bidder=rubicon) so GAM can decision against AdX.", link: "https://docs.prebid.org/adops/key-values.html" },
-    { name: "Audiences", frame: 5, desc: "Identity integration. We use the wrapper to pass first-party data and identity solutions (like LiveRamp or UID2) to enrich the bid request for SSPs.", link: "https://support.google.com/google-ads/answer/7538811" },
+    { name: "Audiences", frame: 5, desc: "Audiences are segments of users grouped by shared behaviors or demographics used for precise campaign targeting. We enhance this by integrating with DMPs like Lotame, a 3rd-party identity provider, leveraging purchased data to build highly valuable, custom audience profiles.", link: "https://support.google.com/google-ads/answer/7538811" },
     { name: "Pricing Rules", frame: 6, desc: "Unified Pricing Rules (UPRs). Freestar Yield Ops actively manages these to balance overall fill rate against premium CPMs across AdX and Header Bidding.", link: "https://support.google.com/admanager/answer/9298008" }
 ];
 
@@ -584,7 +584,7 @@ const adminShards = [
 
 // --- NEW SHARDS FOR AD SERVERS ---
 const adServerShards = [
-    { name: "Publisher Ad Server", frame: 0, desc: "Used by publishers to manage yield, host creatives, and decision ads across owned and operated properties. \n\nExamples: Google Ad Manager, Xandr, Magnite", link: "N/A" },
+    { name: "Publisher Ad Server", frame: 0, desc: "Used by publishers to manage yield, host creatives, and decision ads across owned and operated properties. \n\nExamples: Google Ad Manager, Xandr, Magnite, Primis, TAM, Connatix, etc...", link: "N/A" },
     { name: "3rd-Party Ad Server", frame: 1, desc: "Used to manage, track, and serve creatives across multiple different publisher sites. \n\nExamples: Campaign Manager 360, Sizmek, Flashtalking, AdButler", link: "N/A" },
     { name: "DSPs", frame: 2, desc: "Demand Side Platforms. The interface advertisers use to buy inventory across the ecosystem programmatically. \n\nExamples: DV360, The TradeDesk, MediaMath", link: "N/A" },
     { name: "SSPs", frame: 3, desc: "Supply Side Platforms. The technology publishers use to offer their inventory to multiple DSPs simultaneously. \n\nExamples: Pubmatic, OpenX, Yahoo", link: "N/A" }
@@ -615,8 +615,8 @@ createRoom("programmatic", "DAVID", getFrame(2, 9), "Programmatic Cat", [
     "Pet the cats of programmatic to run the high-speed marketplace."
 ], programmaticShards);
 
-createRoom("privacy", "RYAN", getFrame(4, 8), "Privacy Cat", [
-    "I'm Ryan, Program Manager of Publisher Operations.", 
+createRoom("privacy", "MARTIN H.", getFrame(2, 10), "Privacy Cat", [
+    "I'm Martin H., The Godfather.", 
     "Here is a Cat of Knowledge to guide you safely forward.", 
     "Pet the cats of privacy to keep our data secure and legal."
 ], privacyShards);
@@ -627,8 +627,8 @@ createRoom("admin", "KURT", getFrame(1, 9), "Admin Cat", [
     "Pet the cats of administration to configure the network."
 ], adminShards);
 
-createRoom("adservers", "MARTIN H.", getFrame(2, 10), "Ad Servers Cat", [
-    "Welcome! I'm Martin H.", 
+createRoom("adservers", "Ryan", getFrame(4, 8), "Ad Servers Cat", [
+    "Welcome! I'm Ryan, Program Manager of Publisher Operations \nAd Servers are one of my personal favorite topics! \n\nSo, Don't Screw This Up!!", 
     "Take this Cat of Knowledge to navigate the ecosystem.", 
     "Pet the cats to learn about the different types of ad servers."
 ], adServerShards);
