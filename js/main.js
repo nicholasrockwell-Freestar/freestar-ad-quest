@@ -508,7 +508,7 @@ k.scene("hub", () => {
     const player = spawnPlayer(spawnX, spawnY);
     setControls(player);
 
-    const doorY = 220;
+    const doorY = 180;
     const startX = k.center().x - 350; 
     const spacing = 140; 
     const scale = 3.5;
@@ -517,7 +517,7 @@ k.scene("hub", () => {
     spawnPortal(startX, doorY, "inventory", "INVENTORY", scale);
     spawnPortal(startX + spacing, doorY, "delivery", "DELIVERY", scale);
     spawnPortal(startX + spacing * 2, doorY, "reporting", "INSIGHTS", scale);
-    spawnPortal(startX + spacing * 3, doorY, "programmatic", "Programmatic", scale);
+    spawnPortal(startX + spacing * 3, doorY, "programmatic", "AD EXCHANGE", scale);
     spawnPortal(startX + spacing * 4, doorY, "privacy", "PRIVACY", scale);
     spawnPortal(startX + spacing * 5, doorY, "admin", "ADMIN", scale);
 
@@ -532,24 +532,24 @@ k.scene("hub", () => {
     });
 });
 
-// --- DATA (FREESTAR SPECIFIC FOCUS) ---
+// --- DATA (UPDATED WITH NON-SUPPORT LINKS) ---
 const inventoryShards = [
     { name: "Ad Units", frame: 0, desc: "The foundation of inventory. In GAM, these must precisely match the Pubfig configurations (e.g., lipsumcom_right_siderail_2) or bids will drop.", link: "https://admanager.google.com/15184186#inventory/ad_unit/list" },
-    { name: "Placements", frame: 1, desc: "When a Pub would group a collection of ad units logically for targeting or reporting purposes.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
+    { name: "Placements", frame: 1, desc: "How we group ad units logically. You can view the specific placements Pubfig is expecting on a page by typing 'freestar.fsdata.placements' in the console.", link: "https://admanager.google.com/15184186#inventory/placement/list" },
     { name: "GPT", frame: 2, desc: "The Google Publisher Tag. Pubfig pauses GPT, runs the Prebid auction, injects the winning Key-Values, and then finally lets GPT call GAM with the winner.", link: "https://developers.google.com/publisher-tag/guides/learn-basics" },
-    { name: "Sites", frame: 3, desc: "Domain management. Before a Pub goes live, we must ensure the site is approved in GAM and MCM is fully established to maintain inventory quality.", link: "https://support.google.com/admanager/answer/10130765" },
+    { name: "Sites", frame: 3, desc: "Domain management. Before a Pub goes live, we must ensure the site is approved in GAM and MCM is fully established to maintain inventory quality.", link: "https://setupad.com/blog/google-mcm-guide/" },
     { name: "Key-Values", frame: 4, desc: "How Prebid talks to GAM. Pubfig injects winning bid data (like hb_pb=2.10 or hb_bidder=rubicon) so GAM can decision against AdX.", link: "https://docs.prebid.org/adops/key-values.html" },
-    { name: "Audiences", frame: 5, desc: "Audiences are segments of users grouped by shared behaviors or demographics used for precise campaign targeting. We enhance this by integrating with DMPs like Lotame, a 3rd-party identity provider, leveraging purchased data to build highly valuable, custom audience profiles.", link: "https://support.google.com/google-ads/answer/7538811" },
-    { name: "Pricing Rules", frame: 6, desc: "Unified Pricing Rules (UPRs). Freestar Yield Ops actively manages these to balance overall fill rate against premium CPMs across AdX and Header Bidding.", link: "https://support.google.com/admanager/answer/9298008" }
+    { name: "Audiences", frame: 5, desc: "Audiences are segments of users grouped by shared behaviors or demographics used for precise campaign targeting. We enhance this by integrating with DMPs like Lotame, a 3rd-party identity provider, leveraging purchased data to build highly valuable, custom audience profiles.", link: "https://www.monetizemore.com/blog/10-best-alternatives-to-third-party-cookies/" },
+    { name: "Pricing Rules", frame: 6, desc: "Unified Pricing Rules (UPRs). Freestar Yield Ops actively manages these to balance overall fill rate against premium CPMs across AdX and Header Bidding.", link: "https://www.monetizemore.com/blog/unified-pricing-rule-where-start-how-adjust-real-fill-rate/" }
 ];
 
 const deliveryShards = [
-    { name: "Orders & Line Items", frame: 0, desc: "We rely heavily on automation and APIs to build and manage the thousands of Prebid line items required to catch every price bucket.", link: "https://support.google.com/admanager/answer/9405477" },
-    { name: "Creatives", frame: 1, desc: "Beyond standard display, this is where we manage our highly custom outstream, sticky video players, and high-impact rich media templates.", link: "https://support.google.com/admanager/answer/3185155" },
-    { name: "Targeting", frame: 2, desc: "Used heavily by Yield to restrict direct-sold campaigns to specific wrapper setups, geographics, or premium Freestar inventory.", link: "https://support.google.com/admanager/answer/9766929" },
-    { name: "Prioritization", frame: 3, desc: "The yield waterfall. Direct-Sold sits high at \nSponsorship (4) \nor \nStandard (8) \nwhile our programmatic Header Bidding sits at: \nPrice Priority (12).", link: "https://support.google.com/admanager/answer/177279" },
-    { name: "Forecasting", frame: 4, desc: "Predicting if a publisher's specific placement has enough projected volume to fulfill a custom PMP deal without underdelivering.", link: "https://support.google.com/admanager/answer/7649125" },
-    { name: "Freq Capping", frame: 5, desc: "Protecting the user experience. We use capping to ensure high-impact units don't aggressively fatigue the publisher's audience.", link: "https://support.google.com/admanager/answer/7085745" },
+    { name: "Orders & Line Items", frame: 0, desc: "We rely heavily on automation and APIs to build and manage the thousands of Prebid line items required to catch every price bucket.", link: "https://setupad.com/blog/line-items-in-gam/" },
+    { name: "Creatives", frame: 1, desc: "Beyond standard display, this is where we manage our highly custom outstream, sticky video players, and high-impact rich media templates.", link: "https://www.monetizemore.com/blog/run-ad-exchange-native-formats-compare-performance/" },
+    { name: "Targeting", frame: 2, desc: "Used heavily by Yield to restrict direct-sold campaigns to specific wrapper setups, geographics, or premium Freestar inventory.", link: "https://www.adpushup.com/google-ad-manager/" },
+    { name: "Prioritization", frame: 3, desc: "The yield waterfall. Direct-Sold sits high at \nSponsorship (4) \nor \nStandard (8) \nwhile our programmatic Header Bidding sits at: \nPrice Priority (12).", link: "https://www.monetizemore.com/blog/publishers-ultimate-guide-to-google-ad-manager-line-item-types/" },
+    { name: "Forecasting", frame: 4, desc: "Predicting if a publisher's specific placement has enough projected volume to fulfill a custom PMP deal without underdelivering.", link: "https://www.monetizemore.com/blog/maximize-roi-google-ad-manager/" },
+    { name: "Freq Capping", frame: 5, desc: "Protecting the user experience. We use capping to ensure high-impact units don't aggressively fatigue the publisher's audience.", link: "https://improvado.io/blog/understanding-frequency-capping" },
     { name: "Delivery Tools", frame: 6, desc: "Troubleshooting lifesavers. This tool can help us figure out exactly why an ad unit isn't winning or serving as expected.", link: "https://admanager.google.com/15184186#troubleshooting/websd" }
 ];
 
@@ -561,30 +561,29 @@ const insightsShards = [
 ];
 
 const programmaticShards = [
-    { name: "Open Auction & AdX", frame: 0, desc: "The baseline marketplace. Through MCM, Freestar provides smaller publishers access to premium Google AdX demand they couldn't get alone.", link: "https://iabtechlab.com/standards/openrtb" },
+    { name: "Open Auction & AdX", frame: 0, desc: "The real-time marketplace where buyers bid on unreserved inventory. Understanding RTB protocols is key to optimizing bid density and latency.", link: "https://iabtechlab.com/standards/openrtb" },
     { name: "Header Bidding", frame: 1, desc: "The secret sauce. Orchestrating Prebid.js to maximize auction density without slowing down the page.", link: "https://docs.prebid.org/overview/intro.html" },
-    { name: "PMP & PG Deals", frame: 2, desc: "Programmatic Direct. Executing high-CPM fixed-price agreements and Deal IDs we've secured.", link: "https://support.google.com/admanager/answer/7510110" },
-    { name: "Unified Auction", frame: 3, desc: "The first-price battleground. Prebid partners must successfully pass their bids to GAM in time to compete directly against AdX's dynamic flooring.", link: "https://support.google.com/admanager/answer/9266670" },
-    { name: "Protections", frame: 4, desc: "Brand safety. Alongside GAM rules, we use The Media Trust to actively block malvertising, redirects, and bad actors.", link: "https://support.google.com/admanager/answer/7063071" }
+    { name: "PMP & PG Deals", frame: 2, desc: "Programmatic Direct. Executing high-CPM fixed-price agreements and Deal IDs we've secured.", link: "https://www.adpushup.com/blog/explainer-the-four-types-of-programmatic-deals/" },
+    { name: "Unified Auction", frame: 3, desc: "The first-price battleground. Prebid partners must successfully pass their bids to GAM in time to compete directly against AdX's dynamic flooring.", link: "https://setupad.com/blog/gam-vs-prebid-floor-prices/" },
+    { name: "Protections", frame: 4, desc: "Brand safety. Alongside GAM rules, we use The Media Trust to actively block malvertising, redirects, and bad actors.", link: "https://www.adpushup.com/blog/how-to-prevent-inappropriate-ads-from-hurting-website-revenue/" }
 ];
 
 const privacyShards = [
-    { name: "GDPR, GPP, MSPA", frame: 0, desc: "Global consent. We integrate CMPs (like SourcePoint or OneTrust) directly with the Pubfig to ensure we only fire legal bid requests.", link: "https://support.google.com/admanager/answer/9805367" },
-    { name: "LTD Ads", frame: 1, desc: "The cookieless concept. Testing the Privacy Sandbox, Topics API, and contextual setups to keep CPMs high when third-party data is restricted.", link: "https://support.google.com/admanager/answer/11559288" },
+    { name: "GDPR, GPP, MSPA", frame: 0, desc: "Global consent. We integrate CMPs (like SourcePoint or OneTrust) directly with the Pubfig to ensure we only fire legal bid requests.", link: "https://www.adpushup.com/blog/understanding-iabs-transparency-and-consent-framework-tcf/" },
+    { name: "LTD Ads", frame: 1, desc: "The cookieless concept. Testing the Privacy Sandbox, Topics API, and contextual setups to keep CPMs high when third-party data is restricted.", link: "https://setupad.com/blog/protected-audience-api/" },
     { name: "Data Controls", frame: 2, desc: "Ensuring publisher audience data remains secure and isn't leaked into the bidstream or to SSPs without proper authorization agreements.", link: "https://developers.google.com/ads-data-hub" }
 ];
 
 const adminShards = [
-    { name: "Users & Roles", frame: 0, desc: "Access control...", link: "https://support.google.com/admanager/answer/60220" },
-    { name: "Linked Accounts", frame: 1, desc: "Bridging the gap...", link: "https://support.google.com/admanager/answer/11186985" },
+    { name: "Users & Roles", frame: 0, desc: "Establish governance with custom permission matrices to secure network access, restrict order visibility, and reduce error.", link: "https://setupad.com/blog/google-ad-manager-guide/" },
+    { name: "Linked Accounts", frame: 1, desc: "Eliminate data silos by centralizing analytics. Often Pubs use Google Analytics 4, AdSense, and AdX directly within their GAM.", link: "https://www.adpushup.com/blog/google-dfp-doubleclick-for-publishers/" },
     { name: "API & CRM", frame: 2, desc: "The backbone of our reporting. We utilize GAM APIs to pull raw delivery data.", link: "https://developers.google.com/ad-manager/api/start" },
-    { name: "Ads.txt & MCM", frame: 3, desc: "A constant struggle. Ensuring Freestar's authorized seller list is properly accessible from the Publishers domain.", link: "https://support.google.com/admanager/answer/9335447" },
-    { name: "Policy Center", frame: 4, desc: "The red alert screen. Yield Ops monitors this to resolve sudden 'Two-Click Penalties' or content violations that demonetize Pubs.", link: "https://support.google.com/admanager/answer/9206775" }
+    { name: "Ads.txt & MCM", frame: 3, desc: "A constant struggle. Ensuring Freestar's authorized seller list is properly accessible from the Publishers domain.", link: "https://www.monetizemore.com/blog/google-mcm-multiple-customer-management-guide/" },
+    { name: "Policy Center", frame: 4, desc: "The red alert screen. Yield Ops monitors this to resolve sudden 'Two-Click Penalties' or content violations that demonetize Pubs.", link: "https://www.adpushup.com/blog/prevent-google-ad-manager-policy-violations/" }
 ];
 
-// --- NEW SHARDS FOR AD SERVERS ---
 const adServerShards = [
-    { name: "Publisher Ad Server", frame: 0, desc: "Used by publishers to manage yield, host creatives, and decision ads across owned and operated properties. \n\nExamples: Google Ad Manager, Xandr, Magnite, Primis, TAM, Connatix, etc...", link: "N/A" },
+    { name: "Publisher Ad Server", frame: 0, desc: "Used by publishers to manage yield, host creatives, and decision ads across owned and operated properties. \n\nExamples: Google Ad Manager, Xandr, Magnite", link: "N/A" },
     { name: "3rd-Party Ad Server", frame: 1, desc: "Used to manage, track, and serve creatives across multiple different publisher sites. \n\nExamples: Campaign Manager 360, Sizmek, Flashtalking, AdButler", link: "N/A" },
     { name: "DSPs", frame: 2, desc: "Demand Side Platforms. The interface advertisers use to buy inventory across the ecosystem programmatically. \n\nExamples: DV360, The TradeDesk, MediaMath", link: "N/A" },
     { name: "SSPs", frame: 3, desc: "Supply Side Platforms. The technology publishers use to offer their inventory to multiple DSPs simultaneously. \n\nExamples: Pubmatic, OpenX, Yahoo", link: "N/A" }
@@ -594,43 +593,43 @@ const adServerShards = [
 createRoom("inventory", "KYLE", getFrame(2, 8), "Inventory Cat", [
     "Welcome! I'm Kyle, EVP of Operations!", 
     "Take this Cat of Knowledge to help build your foundation.", 
-    "Pet the cats of inventory to see the blueprints of GAM."
+    "Touch the cats of inventory to see the blueprints of GAM."
 ], inventoryShards);
 
 createRoom("delivery", "PATRICK", getFrame(4, 8), "Delivery Cat", [
     "I'm Patrick, VP of Publisher Support.", 
     "Here is a Cat of Knowledge to keep your delivery on track.", 
-    "Pet the cats of delivery to ensure our ads reach their targets."
+    "Touch the cats of delivery to ensure our ads reach their targets."
 ], deliveryShards);
 
 createRoom("reporting", "CATHENA", getFrame(4, 9), "Insights Cat", [
     "I am Cathena, the Analyst.", 
     "Accept this Cat of Knowledge to help illuminate your path.", 
-    "Pet the cats of insight to turn raw data into strategy."
+    "Touch the cats of insight to turn raw data into strategy."
 ], insightsShards);
 
 createRoom("programmatic", "DAVID", getFrame(2, 9), "Programmatic Cat", [
     "I'm David, AD of Support Engineering.", 
     "Take this Cat of Knowledge to help you master the auction.", 
-    "Pet the cats of programmatic to run the high-speed marketplace."
+    "Touch the cats of programmatic to run the high-speed marketplace."
 ], programmaticShards);
 
-createRoom("privacy", "MARTIN H.", getFrame(2, 10), "Privacy Cat", [
-    "I'm Martin H., The Godfather.", 
+createRoom("privacy", "RYAN", getFrame(4, 8), "Privacy Cat", [
+    "I'm Ryan, Program Manager of Publisher Operations.", 
     "Here is a Cat of Knowledge to guide you safely forward.", 
-    "Pet the cats of privacy to keep our data secure and legal."
+    "Touch the cats of privacy to keep our data secure and legal."
 ], privacyShards);
 
 createRoom("admin", "KURT", getFrame(1, 9), "Admin Cat", [
     "I'm Kurt, CEO.", 
     "I'll provide you with the last Cat Of Knowledge you need to complete your journey.", 
-    "Pet the cats of administration to configure the network."
+    "Touch the cats of administration to configure the network."
 ], adminShards);
 
-createRoom("adservers", "Ryan", getFrame(4, 8), "Ad Servers Cat", [
-    "Welcome! I'm Ryan, Program Manager of Publisher Operations \nAd Servers are one of my personal favorite topics! \n\nSo, Don't Screw This Up!!", 
+createRoom("adservers", "MARTIN H.", getFrame(2, 10), "Ad Servers Cat", [
+    "Welcome! I'm Martin H.", 
     "Take this Cat of Knowledge to navigate the ecosystem.", 
-    "Pet the cats to learn about the different types of ad servers."
+    "Touch the cats to learn about the different types of ad servers."
 ], adServerShards);
 
 k.go("intro");
